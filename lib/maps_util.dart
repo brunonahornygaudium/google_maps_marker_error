@@ -35,7 +35,7 @@ Future<BitmapDescriptor?> bitmapDescriptorFromSvgAsset({
   final size = Size(59, 67);
 
   // Carregar SVG com as cores do tema
-  final svgContent = await rootBundle.loadString('driver.svg');
+  final svgContent = await rootBundle.loadString('assets/driver.svg');
   final pictureInfo = await vg.loadPicture(
     SvgStringLoader(svgContent),
     null,

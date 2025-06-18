@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_marker_error/latlng_tween.dart';
@@ -10,10 +12,9 @@ class MapsWidget extends StatefulWidget {
   State<MapsWidget> createState() => _MapsWidgetState();
 }
 
-class _MapsWidgetState extends State<MapsWidget>
-    with SingleTickerProviderStateMixin {
+class _MapsWidgetState extends State<MapsWidget> with TickerProviderStateMixin {
   late GoogleMapController _controller;
-  final initialPosition = LatLng(-24.24, -24.24);
+  final initialPosition = LatLng(-27.598065, -48.565579);
   Marker? driverMarker;
 
   void _onMapCreated(GoogleMapController controller) {
@@ -27,8 +28,11 @@ class _MapsWidgetState extends State<MapsWidget>
       return;
     }
 
-    final randomLat = initialPosition.latitude + (0.01 * (0.5 - 1));
-    final randomLng = initialPosition.longitude + (0.01 * (0.5 - 1));
+    animationController?.dispose();
+    animationController = null;
+
+    final randomLat = initialPosition.latitude + (Random().nextDouble() * 0.1);
+    final randomLng = initialPosition.longitude + (Random().nextDouble() * 0.1);
     final newPosition = LatLng(randomLat, randomLng);
 
     final tween = LatLngTween(begin: driverMarker!.position, end: newPosition);
@@ -42,7 +46,7 @@ class _MapsWidgetState extends State<MapsWidget>
 
     animationController!.addListener(() {
       final position = animation.value;
-      _controller.animateCamera(CameraUpdate.newLatLng(position));
+      // _controller.animateCamera(CameraUpdate.newLatLng(position));
 
       setState(() {
         driverMarker = driverMarker!.copyWith(
@@ -52,6 +56,8 @@ class _MapsWidgetState extends State<MapsWidget>
         _markers.add(driverMarker!);
       });
     });
+
+    animationController!.forward();
   }
 
   final _markers = <Marker>{};
@@ -72,17 +78,24 @@ class _MapsWidgetState extends State<MapsWidget>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned(
-          child: IconButton(
-            onPressed: _animateMarkerToRandomPosition,
-            icon: Icon(Icons.swap_calls),
-          ),
-        ),
         GoogleMap(
-          initialCameraPosition: CameraPosition(target: initialPosition),
+          initialCameraPosition: CameraPosition(
+            target: initialPosition,
+            zoom: 15.0,
+          ),
+
           onMapCreated: _onMapCreated,
           padding: const EdgeInsets.all(8.0),
           markers: _markers,
+        ),
+
+        Positioned(
+          right: 8,
+          bottom: 80,
+          child: FloatingActionButton(
+            onPressed: _animateMarkerToRandomPosition,
+            child: Icon(Icons.swap_calls),
+          ),
         ),
       ],
     );
